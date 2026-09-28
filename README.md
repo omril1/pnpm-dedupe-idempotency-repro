@@ -59,3 +59,53 @@ First bad release: **12.4.2**.
   A `file:` directory or tarball dependency reproduces.
 - Reduced mechanically from a large private monorepo, where `dedupe` on 12.x also needs
   several runs to settle.
+
+---
+
+# `pnpm11-lockfile/`: `pnpm dedupe` on a lockfile written by pnpm 11
+
+A second fixture, still reproducing with the fix from pnpm/pnpm#16359. It is not
+idempotent on **every** pnpm 12 release, starting from a lockfile that pnpm 11 wrote.
+
+Settings: `injectWorkspacePackages: true`, `linkWorkspacePackages: deep`. Six workspace
+packages; the only registry packages are `winston` and `is-number`.
+
+```
+a   deps: f (workspace:^)
+b   peer: winston@^3
+c   peer: f@^1.0.0
+d   peer: b@^1.0.0
+e   deps: is-number@^7          peer: c@^1.0.0
+f   deps: b (workspace:^)       peer: is-number@>=7
+```
+
+`pnpm-lock.pnpm11.yaml` is the output of `pnpm@11.28.2 install --lockfile-only`: every
+workspace dependency is recorded as `link:`.
+
+```sh
+cd pnpm11-lockfile
+cp pnpm-lock.pnpm11.yaml pnpm-lock.yaml
+corepack pnpm@12.8.1 dedupe --lockfile-only
+corepack pnpm@12.8.1 dedupe --check          # ERR_PNPM_DEDUPE_CHECK_ISSUES (packages/e -> @repro/c)
+corepack pnpm@12.8.1 dedupe --lockfile-only  # changes the lockfile again
+corepack pnpm@12.8.1 dedupe --check          # clean
+```
+
+The first `dedupe` rewrites three importer entries to peer-suffixed `file:` copies
+(`a → f`, `c → f`, `e → c`). On 12.4.2 and later the second turns `e → c` back into
+`link:`; on earlier 12.x the count stays at 3 but the lockfile still changes.
+
+`file:` importer entries:
+
+| pnpm | fresh `install` | pnpm-11 lockfile → `dedupe` | `--check` | → `dedupe` again |
+|---|---|---|---|---|
+| 11.28.2 | 0 | 0 | clean | 0 |
+| 12.0.0 | 3 | 3 | **fails** | 3 (lockfile changed) |
+| 12.4.1 | 3 | 3 | **fails** | 3 (lockfile changed) |
+| 12.4.2 | 3 | 3 | **fails** | 2 |
+| 12.6.0 | 3 | 3 | **fails** | 2 |
+| 12.8.1 | 3 | 3 | **fails** | 2 |
+
+The `fresh install` column is pnpm/pnpm#16354: pnpm 11 injects nothing here.
+
+Reduced mechanically from the same private monorepo, using a CI build of #16359.

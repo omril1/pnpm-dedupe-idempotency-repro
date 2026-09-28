@@ -1,0 +1,7 @@
+{
+  "name": "@repro/a",
+  "version": "1.0.0",
+  "dependencies": {
+    "@repro/f": "workspace:^"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "@repro/d",
+  "version": "1.0.0",
+  "peerDependencies": {
+    "@repro/b": "^1.0.0"
+  }
+}

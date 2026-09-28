@@ -1,0 +1,10 @@
+{
+  "name": "@repro/f",
+  "version": "1.0.0",
+  "dependencies": {
+    "@repro/b": "workspace:^"
+  },
+  "peerDependencies": {
+    "is-number": ">=7.0.0"
+  }
+}
