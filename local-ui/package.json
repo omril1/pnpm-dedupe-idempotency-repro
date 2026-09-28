@@ -1,0 +1,10 @@
+{
+  "name": "local-ui",
+  "version": "1.0.0",
+  "dependencies": {
+    "styled-components": "5.3.11"
+  },
+  "peerDependencies": {
+    "antd": "^5.2.0"
+  }
+}

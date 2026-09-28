@@ -1,0 +1,12 @@
+{
+  "name": "app-b",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@mui/x-date-pickers": "^6.4.0",
+    "local-ui": "file:../../local-ui",
+    "react": "18.3.1",
+    "react-date-range": "^2.0.1",
+    "react-dates": "^21.8.0"
+  }
+}
